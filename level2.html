@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Level 2 Challenge</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .cell {
+      stroke: #ccc;
+      stroke-width: 1px;
+    }
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      width: 60px;
+      height: 28px;
+      padding: 2px;
+      font: 12px sans-serif;
+      background: lightsteelblue;
+      border: 0px;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+    .legend {
+      font-size: 12px;
+    }
+    .mini-chart {
+      fill: none;
+      stroke-width: 1.5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="heatmap"></div>
+  <script>
+    // Load data
+    const data = [
+      // Sample data format: { year: 2021, month: 1, days: [ { day: 1, max: 15.5, min: 10.1 }, ... ] }
+      // Populate with actual data
+    ];
+
+    const margin = { top: 50, right: 70, bottom: 50, left: 50 };
+    const width = 800 - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
+
+    const svg = d3.select("#heatmap")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    const years = [...new Set(data.map(d => d.year))];
+    const months = [...new Set(data.map(d => d.month))];
+
+    const xScale = d3.scaleBand()
+      .domain(years)
+      .range([0, width])
+      .padding(0.05);
+
+    const yScale = d3.scaleBand()
+      .domain(months)
+      .range([0, height])
+      .padding(0.05);
+
+    const colorScale = d3.scaleSequential(d3.interpolateRdYlBu)
+      .domain(d3.extent(data.flatMap(d => d.days.flatMap(day => [day.max, day.min]))));
+
+    const cellWidth = xScale.bandwidth();
+    const cellHeight = yScale.bandwidth();
+
+    svg.selectAll(".cell")
+      .data(data)
+      .enter()
+      .append("g")
+      .attr("class", "cell")
+      .attr("transform", d => `translate(${xScale(d.year)}, ${yScale(d.month)})`)
+      .each(function(d) {
+        const cell = d3.select(this);
+
+        const miniXScale = d3.scaleLinear()
+          .domain([1, d.days.length])
+          .range([0, cellWidth]);
+
+        const miniYScale = d3.scaleLinear()
+          .domain(d3.extent(d.days.flatMap(day => [day.max, day.min])))
+          .range([cellHeight, 0]);
+
+        const lineMax = d3.line()
+          .x(day => miniXScale(day.day))
+          .y(day => miniYScale(day.max));
+
+        const lineMin = d3.line()
+          .x(day => miniXScale(day.day))
+          .y(day => miniYScale(day.min));
+
+        cell.append("rect")
+          .attr("width", cellWidth)
+          .attr("height", cellHeight)
+          .style("fill", colorScale(d3.mean(d.days.flatMap(day => [day.max, day.min]))))
+          .on("mouseover", function(event, d) {
+            tooltip.style("opacity", 1)
+              .html(`Year: ${d.year}<br>Month: ${d.month}`)
+              .style("left", `${event.pageX + 5}px`)
+              .style("top", `${event.pageY - 28}px`);
+          })
+          .on("mouseout", function() {
+            tooltip.style("opacity", 0);
+          });
+
+        cell.append("path")
+          .datum(d.days)
+          .attr("class", "mini-chart")
+          .attr("d", lineMax)
+          .style("stroke", "red");
+
+        cell.append("path")
+          .datum(d.days)
+          .attr("class", "mini-chart")
+          .attr("d", lineMin)
+          .style("stroke", "blue");
+      });
+
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    // Add axes
+    svg.append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+    svg.append("g")
+      .call(d3.axisLeft(yScale).tickFormat(d3.timeFormat("%B")));
+
+    // Add legend
+    const legend = svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${width + 20}, 0)`);
+
+    const legendScale = d3.scaleLinear()
+      .domain(colorScale.domain())
+      .range([0, height]);
+
+    legend.selectAll(".legend-rect")
+      .data(d3.range(...colorScale.domain(), (colorScale.domain()[1] - colorScale.domain()[0]) / 10))
+      .enter()
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", d => legendScale(d))
+      .attr("width", 10)
+      .attr("height", legendScale(1) - legendScale(0))
+      .style("fill", d => colorScale(d));
+
+    legend.append("g")
+      .attr("transform", `translate(10, 0)`)
+      .call(d3.axisRight(legendScale).ticks(10));
+  </script>
+</body>
+</html>
