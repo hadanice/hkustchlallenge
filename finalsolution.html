@@ -17,7 +17,7 @@
     </style>
 </head>
 <body>
-    <button onclick="toggleMode()">ÇĞ»»×î¸ß/×îµÍÎÂ¶È</button>
+    <button onclick="toggleMode()">åˆ‡æ¢æœ€é«˜/æœ€ä½æ¸©åº¦</button>
     <div id="chart"></div>
     <script>
         let currentMode = 'max';
@@ -31,16 +31,16 @@
         function toggleMode() {
             currentMode = currentMode === 'max' ? 'min' : 'max';
             updateHeatmap();
-            // ¸üĞÂ×î¸ßÎÂÕÛÏßµÄÍ¸Ã÷¶È
+            // æ›´æ–°æœ€é«˜æ¸©æŠ˜çº¿çš„é€æ˜åº¦
             svg.selectAll(".max-line")
                 .transition()
                 .style("opacity", currentMode === 'max' ? 1 : 0.2);
 
-            // ¸üĞÂ×îµÍÎÂÕÛÏßµÄÍ¸Ã÷¶È
+            // æ›´æ–°æœ€ä½æ¸©æŠ˜çº¿çš„é€æ˜åº¦
             svg.selectAll(".min-line")
                 .transition()
                 .style("opacity", currentMode === 'min' ? 1 : 0.2);
-            // ¸üĞÂÍ¼Àı
+            // æ›´æ–°å›¾ä¾‹
             svg.selectAll("g.legend").remove();
             svg.selectAll("defs").remove();
             addLegend();            
@@ -54,19 +54,19 @@
                     : colorScaleMin(d.minTemp));
         }
 
-        // Ìí¼ÓÍ¼Àı
+        // æ·»åŠ å›¾ä¾‹
         function addLegend() {
             const legendWidth = 200;
             const legendHeight = 20;
             const legendX = width - margin.right - legendWidth;
             const legendY = height - margin.bottom + 20;
 
-            // Çå³ı¾ÉµÄÍ¼Àı
+            // æ¸…é™¤æ—§çš„å›¾ä¾‹
             svg.selectAll("g.legend").remove();
             svg.selectAll("defs").remove();
 
 
-            // ´´½¨Ò»¸ö½¥±ä
+            // åˆ›å»ºä¸€ä¸ªæ¸å˜
             const defs = svg.append("defs");
             const linearGradient = defs.append("linearGradient")
                 .attr("id", "legend-gradient")
@@ -87,7 +87,7 @@
                     .attr("stop-color", color);
             }
 
-            // Ìí¼Ó½¥±ä¾ØĞÎ
+            // æ·»åŠ æ¸å˜çŸ©å½¢
             svg.append("rect")
                 .attr("x", legendX)
                 .attr("y", legendY)
@@ -95,22 +95,22 @@
                 .attr("height", legendHeight)
                 .style("fill", "url(#legend-gradient)");
 
-            // Ìí¼ÓÍ¼ÀıµÄÊıÖµ±ê×¢
+            // æ·»åŠ å›¾ä¾‹çš„æ•°å€¼æ ‡æ³¨
             svg.append("text")
                 .attr("x", legendX)
                 .attr("y", legendY + legendHeight + 20)
-                .text(extent[0].toFixed(1)) // ÏÔÊ¾×îĞ¡Öµ
+                .text(extent[0].toFixed(1)) // æ˜¾ç¤ºæœ€å°å€¼
                 .attr("text-anchor", "start")
                 .style("font-size", "12px");
 
             svg.append("text")
                 .attr("x", legendX + legendWidth)
                 .attr("y", legendY + legendHeight + 20)
-                .text(extent[1].toFixed(1)) // ÏÔÊ¾×î´óÖµ
+                .text(extent[1].toFixed(1)) // æ˜¾ç¤ºæœ€å¤§å€¼
                 .attr("text-anchor", "end")
                 .style("font-size", "12px");
 
-            // Ìí¼ÓÍ¼ÀıµÄ¿Ì¶È
+            // æ·»åŠ å›¾ä¾‹çš„åˆ»åº¦
             const legendScale = d3.scaleLinear()
                 .domain(extent)
                 .range([legendX, legendX + legendWidth]);
@@ -123,7 +123,7 @@
                 .call(legendAxis);
         }
 
-        d3.csv("daily.csv").then(data => {
+        d3.csv("https://github.com/HKUST-VISLab/coding-challenge/blob/master/temperature_daily.csv").then(data => {
             const parsedData = data.map(d => ({
                 date: d3.timeParse("%Y-%m-%d")(d.date),
                 max_temp: +d.max_temperature,
@@ -171,7 +171,7 @@
                 .attr("width", width)
                 .attr("height", height);
 
-            // »æÖÆ×ø±êÖá
+            // ç»˜åˆ¶åæ ‡è½´
             svg.append("g")
                 .attr("transform", `translate(0,${margin.top})`)
                 .call(d3.axisTop(xScale).tickSizeOuter(0));
@@ -199,7 +199,7 @@
                     ? colorScaleMax(d.maxTemp) 
                     : colorScaleMin(d.minTemp))
                 .on("mouseover", function(event, d) {
-                    tooltip.html(`${d.year}Äê${d.month}ÔÂ<br>${currentMode === 'max' ? '×î¸ß' : '×îµÍ'}ÎÂ: ${currentMode === 'max' ? d.maxTemp : d.minTemp}`)
+                    tooltip.html(`${d.year}å¹´${d.month}æœˆ<br>${currentMode === 'max' ? 'æœ€é«˜' : 'æœ€ä½'}æ¸©: ${currentMode === 'max' ? d.maxTemp : d.minTemp}`)
                         .style("visibility", "visible")
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 20) + "px");
@@ -231,11 +231,11 @@
                     .datum(d.days)
                     .attr("class", "max-line")
                     .attr("d", lineMax)
-                    .attr("stroke", "#ff0000") // ×î¸ßÎÂÕÛÏßÑÕÉ«
+                    .attr("stroke", "#ff0000") // æœ€é«˜æ¸©æŠ˜çº¿é¢œè‰²
                     .attr("stroke-width", 0.8)
                     .attr("fill", "none");
 
-                // »æÖÆ×îµÍÎÂÕÛÏß
+                // ç»˜åˆ¶æœ€ä½æ¸©æŠ˜çº¿
                 const lineMin = d3.line()
                     .x((_, i) => xLine(i + 1))
                     .y(d => yLine(d.min_temp));
@@ -244,11 +244,11 @@
                     .datum(d.days)
                     .attr("class", "min-line")
                     .attr("d", lineMin)
-                    .attr("stroke", "#0000ff") // ×îµÍÎÂÕÛÏßÑÕÉ«
+                    .attr("stroke", "#0000ff") // æœ€ä½æ¸©æŠ˜çº¿é¢œè‰²
                     .attr("stroke-width", 0.8)
                     .attr("fill", "none");
             });
-            // µ÷ÓÃÌí¼ÓÍ¼Àıº¯Êı
+            // è°ƒç”¨æ·»åŠ å›¾ä¾‹å‡½æ•°
             addLegend();
         });
     </script>
